@@ -1,3 +1,8 @@
+/**
+ * ChatMessage Component - Presentation Layer
+ * Displays a single message in the chat
+ */
+
 "use client";
 
 import { Check, Copy, RotateCw } from "lucide-react";
@@ -7,78 +12,79 @@ import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import type { Message } from "@/domain/entities/Message";
+import { extractHtmlFromMarkdown, hasHtmlCode } from "@/lib/html-extractor";
 import { cn } from "@/lib/utils";
-import type { Message } from "@/types/chat";
+import { DownloadHtmlButton } from "./download-html-button";
 
 function MarkdownContent({ content }: { content: string }) {
   return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeHighlight]}
-      // @ts-ignore
-      ƒ
-      className="text-sm leading-relaxed"
-      components={{
-        code: ({ node, className, children, ...props }) => {
-          const match = /language-(\w+)/.exec(className || "");
-          const isInline = !match;
+    <div className="text-sm leading-relaxed">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeHighlight]}
+        components={{
+          code: ({ className, children, ...props }) => {
+            const match = /language-(\w+)/.exec(className || "");
+            const isInline = !match;
 
-          if (isInline) {
+            if (isInline) {
+              return (
+                <code
+                  className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm"
+                  {...props}
+                >
+                  {children}
+                </code>
+              );
+            }
+
             return (
-              <code
-                className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm"
-                {...props}
-              >
+              <code className={className} {...props}>
                 {children}
               </code>
             );
-          }
-
-          return (
-            <code className={className} {...props}>
+          },
+          pre: ({ children }) => (
+            <pre className="overflow-x-auto rounded-lg bg-muted p-4 my-4">
               {children}
-            </code>
-          );
-        },
-        pre: ({ children }) => (
-          <pre className="overflow-x-auto rounded-lg bg-muted p-4 my-4">
-            {children}
-          </pre>
-        ),
-        ul: ({ children }) => (
-          <ul className="my-2 ml-6 list-disc [&>li]:mt-1">{children}</ul>
-        ),
-        ol: ({ children }) => (
-          <ol className="my-2 ml-6 list-decimal [&>li]:mt-1">{children}</ol>
-        ),
-        h1: ({ children }) => (
-          <h1 className="mt-6 mb-4 text-2xl font-bold">{children}</h1>
-        ),
-        h2: ({ children }) => (
-          <h2 className="mt-5 mb-3 text-xl font-bold">{children}</h2>
-        ),
-        h3: ({ children }) => (
-          <h3 className="mt-4 mb-2 text-lg font-semibold">{children}</h3>
-        ),
-        blockquote: ({ children }) => (
-          <blockquote className="border-l-4 border-muted-foreground/20 pl-4 italic my-4">
-            {children}
-          </blockquote>
-        ),
-        a: ({ children, href }) => (
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-primary underline underline-offset-4 hover:text-primary/80"
-          >
-            {children}
-          </a>
-        ),
-      }}
-    >
-      {content}
-    </ReactMarkdown>
+            </pre>
+          ),
+          ul: ({ children }) => (
+            <ul className="my-2 ml-6 list-disc [&>li]:mt-1">{children}</ul>
+          ),
+          ol: ({ children }) => (
+            <ol className="my-2 ml-6 list-decimal [&>li]:mt-1">{children}</ol>
+          ),
+          h1: ({ children }) => (
+            <h1 className="mt-6 mb-4 text-2xl font-bold">{children}</h1>
+          ),
+          h2: ({ children }) => (
+            <h2 className="mt-5 mb-3 text-xl font-bold">{children}</h2>
+          ),
+          h3: ({ children }) => (
+            <h3 className="mt-4 mb-2 text-lg font-semibold">{children}</h3>
+          ),
+          blockquote: ({ children }) => (
+            <blockquote className="border-l-4 border-muted-foreground/20 pl-4 italic my-4">
+              {children}
+            </blockquote>
+          ),
+          a: ({ children, href }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary underline underline-offset-4 hover:text-primary/80"
+            >
+              {children}
+            </a>
+          ),
+        }}
+      >
+        {content}
+      </ReactMarkdown>
+    </div>
   );
 }
 
@@ -96,7 +102,11 @@ export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const isUser = message.role === "user";
+  const isUser = message.isUser();
+  const hasHtml = !isUser && hasHtmlCode(message.content);
+  const extractedHtml = hasHtml
+    ? extractHtmlFromMarkdown(message.content)
+    : null;
 
   return (
     <div
@@ -133,7 +143,7 @@ export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
           </span>
         </div>
 
-        {message.attachments && message.attachments.length > 0 && (
+        {message.hasAttachments() && message.attachments && (
           <div className="flex flex-wrap gap-2">
             {message.attachments.map((attachment) => (
               <div
@@ -155,11 +165,16 @@ export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
               {message.content}
             </p>
           ) : (
-            <MarkdownContent content={message.content} />
+            <div className="relative">
+              <MarkdownContent content={message.content} />
+              {message.isStreaming && (
+                <span className="inline-block w-0.5 h-4 bg-purple-600 typing-cursor ml-0.5 align-middle" />
+              )}
+            </div>
           )}
         </div>
 
-        {!isUser && (
+        {!isUser && !message.isStreaming && (
           <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
             <Button
               variant="ghost"
@@ -174,6 +189,14 @@ export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
               )}
               <span className="ml-1 text-xs">{copied ? "Copied" : "Copy"}</span>
             </Button>
+
+            {hasHtml && extractedHtml && (
+              <DownloadHtmlButton
+                htmlContent={extractedHtml}
+                messageId={message.id}
+              />
+            )}
+
             {onRegenerate && (
               <Button
                 variant="ghost"

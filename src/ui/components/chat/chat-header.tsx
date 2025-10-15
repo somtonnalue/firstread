@@ -1,12 +1,11 @@
+/**
+ * ChatHeader Component - Presentation Layer
+ * Header with model selector and actions
+ */
+
 "use client";
 
-import {
-  Download,
-  MoreHorizontal,
-  Settings,
-  Sparkles,
-  Trash2,
-} from "lucide-react";
+import { Download, MoreHorizontal, Settings, Trash2 } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CHAT_MODELS } from "@/types/chat";
+import { AVAILABLE_MODELS } from "@/shared/contracts/chat.contract";
 
 interface ChatHeaderProps {
   onClearChat?: () => void;
@@ -43,10 +42,7 @@ export function ChatHeader({
       <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-purple-500 to-purple-700">
-              <Sparkles className="h-4 w-4 text-white" />
-            </div>
-            <h1 className="text-lg font-semibold">FirstRead</h1>
+            <h1 className="text-lg font-semibold tracking-tight">FirstRead</h1>
           </div>
         </div>
 
@@ -56,7 +52,7 @@ export function ChatHeader({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {CHAT_MODELS.map((model) => (
+              {AVAILABLE_MODELS.map((model) => (
                 <SelectItem key={model.id} value={model.id}>
                   <div className="flex flex-col">
                     <span className="font-medium">{model.name}</span>

@@ -13,7 +13,7 @@ import { ChatThread } from "@/ui/components/chat/chat-thread";
 import { useChat } from "@/ui/hooks/useChat";
 
 export default function Home() {
-  const [selectedModel, setSelectedModel] = useState("gemini-1.5-pro");
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
 
   const {
     messages,
@@ -24,6 +24,7 @@ export default function Home() {
     clearMessages,
     exportChat,
   } = useChat({
+    modelId: selectedModel,
     onError: (error) => {
       toast.error("Failed to send message", {
         description: error.message,
@@ -35,7 +36,7 @@ export default function Home() {
     if (messages.length > 0) {
       if (
         confirm(
-          "Are you sure you want to clear all messages? This cannot be undone."
+          "Are you sure you want to clear all messages? This cannot be undone.",
         )
       ) {
         await clearMessages();
