@@ -21,6 +21,7 @@ export default function Home() {
     isStreaming,
     streamingMessageId,
     sendMessage,
+    stopStreaming,
     clearMessages,
     exportChat,
   } = useChat({
@@ -79,7 +80,12 @@ export default function Home() {
         />
       </div>
 
-      <ChatInput onSend={sendMessage} isLoading={isLoading} />
+      <ChatInput
+        onSend={sendMessage}
+        onStop={stopStreaming}
+        isLoading={isLoading}
+        isStreaming={isStreaming}
+      />
     </div>
   );
 }

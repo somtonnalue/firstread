@@ -13,9 +13,20 @@ import type { Attachment } from "@/shared/contracts/chat.contract";
 
 export class ApiChatService implements IChatService {
   private baseUrl: string;
+  private abortController: AbortController | null = null;
 
   constructor(baseUrl: string = "/api") {
     this.baseUrl = baseUrl;
+  }
+
+  /**
+   * Abort ongoing streaming request
+   */
+  abort(): void {
+    if (this.abortController) {
+      this.abortController.abort();
+      this.abortController = null;
+    }
   }
 
   async sendMessage(
@@ -92,12 +103,16 @@ export class ApiChatService implements IChatService {
         })),
       };
 
+      // Create new abort controller for this request
+      this.abortController = new AbortController();
+
       const response = await fetch(`${this.baseUrl}/chat/stream`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(requestBody),
+        signal: this.abortController.signal,
       });
 
       if (!response.ok) {
@@ -144,10 +159,17 @@ export class ApiChatService implements IChatService {
 
       return Message.create("assistant", fullResponse);
     } catch (error) {
+      // Don't log abort errors as they're user-initiated
+      if (error instanceof Error && error.name === "AbortError") {
+        throw error; // Re-throw to handle upstream
+      }
+
       console.error("API Streaming Error:", error);
       throw new Error(
         `Failed to stream message: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
+    } finally {
+      this.abortController = null;
     }
   }
 }

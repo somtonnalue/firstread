@@ -5,7 +5,13 @@
 
 "use client";
 
-import { FileText, Image as ImageIcon, Paperclip, Send, X } from "lucide-react";
+import {
+  FileText,
+  Image as ImageIcon,
+  Paperclip,
+  Square,
+  X,
+} from "lucide-react";
 import { type KeyboardEvent, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,13 +20,17 @@ import type { Attachment } from "@/shared/contracts/chat.contract";
 
 interface ChatInputProps {
   onSend: (message: string, attachments?: Attachment[]) => void;
+  onStop?: () => void;
   isLoading?: boolean;
+  isStreaming?: boolean;
   placeholder?: string;
 }
 
 export function ChatInput({
   onSend,
+  onStop,
   isLoading = false,
+  isStreaming = false,
   placeholder = "Message Assistant...",
 }: ChatInputProps) {
   const [message, setMessage] = useState("");
@@ -132,14 +142,26 @@ export function ChatInput({
               )}
               rows={1}
             />
-            <Button
-              onClick={handleSend}
-              disabled={!message.trim() || isLoading}
-              size="icon"
-              className="absolute bottom-2 right-2 h-8 w-8"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
+            {isStreaming ? (
+              <Button
+                onClick={onStop}
+                size="sm"
+                variant="destructive"
+                className="absolute bottom-2 right-2 h-8 px-3"
+              >
+                <Square className="h-3 w-3 mr-1" />
+                Stop
+              </Button>
+            ) : (
+              <Button
+                onClick={handleSend}
+                disabled={!message.trim() || isLoading}
+                size="sm"
+                className="absolute bottom-2 right-2 h-8 px-3"
+              >
+                {isLoading ? "Generating" : "Generate"}
+              </Button>
+            )}
           </div>
         </div>
 

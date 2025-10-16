@@ -25,6 +25,7 @@ interface UseChatReturn {
   streamingMessageId: string | null;
   isStreaming: boolean;
   sendMessage: (content: string, attachments?: Attachment[]) => Promise<void>;
+  stopStreaming: () => void;
   clearMessages: () => Promise<void>;
   deleteMessage: (messageId: string) => void;
   exportChat: () => Promise<string>;
@@ -51,6 +52,8 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     null,
   );
   const [isStreaming, setIsStreaming] = useState(false);
+  const [abortController, setAbortController] =
+    useState<AbortController | null>(null);
 
   const sendMessage = useCallback(
     async (content: string, attachments?: Attachment[]) => {
@@ -58,6 +61,10 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
 
       setIsLoading(true);
       setIsStreaming(true);
+
+      // Create abort controller for this request
+      const controller = new AbortController();
+      setAbortController(controller);
 
       try {
         // Create user message immediately
@@ -133,16 +140,54 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         setStreamingMessageId(null);
       } catch (error) {
         setStreamingMessageId(null);
-        options.onError?.(
-          error instanceof Error ? error : new Error("Failed to send message"),
-        );
+
+        // Don't show error if it was aborted by user
+        if (error instanceof Error && error.name !== "AbortError") {
+          options.onError?.(error);
+        }
       } finally {
         setIsLoading(false);
         setIsStreaming(false);
+        setAbortController(null);
       }
     },
     [thread, options],
   );
+
+  const stopStreaming = useCallback(() => {
+    if (abortController) {
+      abortController.abort();
+      setIsLoading(false);
+      setIsStreaming(false);
+      setStreamingMessageId(null);
+      setAbortController(null);
+
+      // Mark the current streaming message as complete
+      if (streamingMessageId && thread) {
+        setThread((prevThread) => {
+          if (!prevThread) return prevThread;
+
+          const message = prevThread.messages.find(
+            (msg) => msg.id === streamingMessageId,
+          );
+
+          if (message) {
+            const stoppedMessage = new Message(
+              message.id,
+              message.role,
+              message.content,
+              message.timestamp,
+              message.attachments,
+              false, // Mark as not streaming
+            );
+            return prevThread.updateMessage(streamingMessageId, stoppedMessage);
+          }
+
+          return prevThread;
+        });
+      }
+    }
+  }, [abortController, streamingMessageId, thread]);
 
   const clearMessages = useCallback(async () => {
     if (!thread) return;
@@ -188,6 +233,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     streamingMessageId,
     isStreaming,
     sendMessage,
+    stopStreaming,
     clearMessages,
     deleteMessage,
     exportChat,

@@ -1,6 +1,29 @@
 {
   "name": "firstread",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "AI-powered document generator - Create Terms of Service, Privacy Policies, and legal documents with Google Gemini AI. Download as HTML or PDF.",
+  "author": {
+    "name": "Somtochukwu N Leroy",
+    "email": "somtonnalue@example.com",
+    "url": "https://twitter.com/somtonnalue"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/somtonnalue/firstread"
+  },
+  "keywords": [
+    "ai",
+    "document-generator",
+    "legal-documents",
+    "terms-of-service",
+    "privacy-policy",
+    "gemini",
+    "nextjs",
+    "react",
+    "typescript",
+    "hexagonal-architecture"
+  ],
+  "license": "MIT",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
