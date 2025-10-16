@@ -5,15 +5,16 @@
 
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChatHeader } from "@/ui/components/chat/chat-header";
-import { ChatInput } from "@/ui/components/chat/chat-input";
+import { ChatInput, type ChatInputRef } from "@/ui/components/chat/chat-input";
 import { ChatThread } from "@/ui/components/chat/chat-thread";
 import { useChat } from "@/ui/hooks/useChat";
 
 export default function Home() {
   const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
+  const chatInputRef = useRef<ChatInputRef>(null);
 
   const {
     messages,
@@ -62,6 +63,11 @@ export default function Home() {
     toast.success("Chat exported successfully");
   };
 
+  const handlePromptClick = (prompt: string) => {
+    chatInputRef.current?.setValue(prompt);
+    chatInputRef.current?.focus();
+  };
+
   return (
     <div className="flex h-screen flex-col">
       <ChatHeader
@@ -77,10 +83,12 @@ export default function Home() {
           isLoading={isLoading}
           isStreaming={isStreaming}
           streamingMessageId={streamingMessageId}
+          onPromptClick={handlePromptClick}
         />
       </div>
 
       <ChatInput
+        ref={chatInputRef}
         onSend={sendMessage}
         onStop={stopStreaming}
         isLoading={isLoading}

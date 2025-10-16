@@ -428,7 +428,7 @@ Generate complete, professional, production-ready documents that save users hour
     content: string,
     _attachments?: Attachment[],
     context?: Message[],
-    modelId?: string
+    modelId?: string,
   ): Promise<Message> {
     try {
       const model = this.genAI.getGenerativeModel({
@@ -455,7 +455,7 @@ Generate complete, professional, production-ready documents that save users hour
       throw new Error(
         `Failed to get response from Gemini: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     }
   }
@@ -465,7 +465,7 @@ Generate complete, professional, production-ready documents that save users hour
     _attachments: Attachment[] | undefined,
     context: Message[],
     onChunk: (chunk: string) => void,
-    modelId?: string
+    modelId?: string,
   ): Promise<Message> {
     try {
       const model = this.genAI.getGenerativeModel({
@@ -499,7 +499,7 @@ Generate complete, professional, production-ready documents that save users hour
       throw new Error(
         `Failed to stream response from Gemini: ${
           error instanceof Error ? error.message : "Unknown error"
-        }`
+        }`,
       );
     }
   }
@@ -509,7 +509,7 @@ Generate complete, professional, production-ready documents that save users hour
    * Converts our Message entities to Gemini's format
    */
   private buildHistory(
-    context?: Message[]
+    context?: Message[],
   ): Array<{ role: string; parts: Array<{ text: string }> }> {
     if (!context || context.length === 0) {
       return [];

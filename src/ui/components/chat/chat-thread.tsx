@@ -17,6 +17,7 @@ interface ChatThreadProps {
   isStreaming?: boolean;
   streamingMessageId?: string | null;
   onRegenerate?: (messageId: string) => void;
+  onPromptClick?: (prompt: string) => void;
 }
 
 export function ChatThread({
@@ -24,6 +25,7 @@ export function ChatThread({
   isLoading,
   isStreaming,
   onRegenerate,
+  onPromptClick,
 }: ChatThreadProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -56,41 +58,57 @@ export function ChatThread({
           </div>
           <div>
             <h2 className="text-2xl font-semibold mb-2">
-              Start a conversation
+              Generate Professional Documents
             </h2>
             <p className="text-sm text-muted-foreground">
-              Send a message to begin chatting with the AI assistant. You can
-              ask questions, request help, or have a conversation.
+              Create comprehensive legal documents, Terms of Service, Privacy
+              Policies, and more with AI. Get production-ready HTML templates
+              you can download as HTML or PDF.
             </p>
           </div>
           <div className="grid gap-2 text-left">
             <button
               type="button"
-              className="rounded-lg border bg-card p-3 text-sm hover:bg-accent transition-colors text-left"
+              onClick={() =>
+                onPromptClick?.(
+                  "Generate a comprehensive Terms of Service for FirstRead, an AI-powered document generation platform. Include user accounts, subscription billing, data usage, intellectual property, and termination clauses.",
+                )
+              }
+              className="rounded-lg border bg-card p-3 text-sm hover:bg-accent hover:border-purple-500 transition-colors text-left"
             >
               <div className="font-medium mb-1">
-                Help me write a professional email
+                📄 Generate Terms of Service
               </div>
               <div className="text-xs text-muted-foreground">
-                Draft a message for work
-              </div>
-            </button>
-            <button
-              type="button"
-              className="rounded-lg border bg-card p-3 text-sm hover:bg-accent transition-colors text-left"
-            >
-              <div className="font-medium mb-1">Explain a complex concept</div>
-              <div className="text-xs text-muted-foreground">
-                Break down any topic simply
+                Comprehensive TOS with subscription and IP clauses
               </div>
             </button>
             <button
               type="button"
-              className="rounded-lg border bg-card p-3 text-sm hover:bg-accent transition-colors text-left"
+              onClick={() =>
+                onPromptClick?.(
+                  "Generate a GDPR and CCPA compliant Privacy Policy for FirstRead. Include data collection, user rights, cookie policy, data retention, and international data transfers.",
+                )
+              }
+              className="rounded-lg border bg-card p-3 text-sm hover:bg-accent hover:border-purple-500 transition-colors text-left"
             >
-              <div className="font-medium mb-1">Debug my code</div>
+              <div className="font-medium mb-1">🔒 Generate Privacy Policy</div>
               <div className="text-xs text-muted-foreground">
-                Get help with programming
+                GDPR/CCPA compliant with cookie policy
+              </div>
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                onPromptClick?.(
+                  "Generate a SaaS Master Services Agreement for FirstRead. Include scope of services, payment terms, SLA commitments, data processing agreement, IP ownership, warranties, indemnification, and dispute resolution.",
+                )
+              }
+              className="rounded-lg border bg-card p-3 text-sm hover:bg-accent hover:border-purple-500 transition-colors text-left"
+            >
+              <div className="font-medium mb-1">📋 Generate SaaS Agreement</div>
+              <div className="text-xs text-muted-foreground">
+                Complete MSA with SLA and data processing terms
               </div>
             </button>
           </div>
