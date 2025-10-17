@@ -18,7 +18,7 @@ import type { IChatService } from "@/ports/IChatService";
 export class ClientContainer {
   private static instance: ClientContainer;
 
-  private _chatService: IChatService;
+  private _chatService: ApiChatService;
   private _chatRepository: IChatRepository;
   private _sendMessageUseCase: SendMessageUseCase;
   private _streamMessageUseCase: StreamMessageUseCase;
@@ -53,7 +53,7 @@ export class ClientContainer {
     return ClientContainer.instance;
   }
 
-  get chatService(): IChatService {
+  get chatService(): ApiChatService {
     return this._chatService;
   }
 
@@ -71,6 +71,13 @@ export class ClientContainer {
 
   get manageChatThreadUseCase(): ManageChatThreadUseCase {
     return this._manageChatThreadUseCase;
+  }
+
+  /**
+   * Abort ongoing streaming request
+   */
+  abortStreaming(): void {
+    this._chatService.abort();
   }
 }
 

@@ -155,53 +155,51 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
   );
 
   const stopStreaming = useCallback(() => {
-    if (abortController) {
-      abortController.abort();
-      setIsLoading(false);
-      setIsStreaming(false);
-      setStreamingMessageId(null);
-      setAbortController(null);
+    // Abort via the client container's chat service
+    clientContainer.abortStreaming();
 
-      // Mark the current streaming message as complete
-      if (streamingMessageId && thread) {
-        setThread((prevThread) => {
-          if (!prevThread) return prevThread;
+    setIsLoading(false);
+    setIsStreaming(false);
+    setAbortController(null);
 
-          const message = prevThread.messages.find(
-            (msg) => msg.id === streamingMessageId,
+    // Mark the current streaming message as complete
+    if (streamingMessageId && thread) {
+      setThread((prevThread) => {
+        if (!prevThread) return prevThread;
+
+        const message = prevThread.messages.find(
+          (msg) => msg.id === streamingMessageId,
+        );
+
+        if (message) {
+          const stoppedMessage = new Message(
+            message.id,
+            message.role,
+            message.content,
+            message.timestamp,
+            message.attachments,
+            false, // Mark as not streaming
           );
+          return prevThread.updateMessage(streamingMessageId, stoppedMessage);
+        }
 
-          if (message) {
-            const stoppedMessage = new Message(
-              message.id,
-              message.role,
-              message.content,
-              message.timestamp,
-              message.attachments,
-              false, // Mark as not streaming
-            );
-            return prevThread.updateMessage(streamingMessageId, stoppedMessage);
-          }
-
-          return prevThread;
-        });
-      }
+        return prevThread;
+      });
+      setStreamingMessageId(null);
     }
-  }, [abortController, streamingMessageId, thread]);
+  }, [streamingMessageId, thread]);
 
   const clearMessages = useCallback(async () => {
-    if (!thread) return;
-
     try {
-      const clearedThread =
-        await clientContainer.manageChatThreadUseCase.clearThread(thread.id);
-      setThread(clearedThread);
+      // Simply create a new thread instead of trying to clear
+      const newThread = ChatThread.create();
+      setThread(newThread);
     } catch (error) {
       options.onError?.(
         error instanceof Error ? error : new Error("Failed to clear messages"),
       );
     }
-  }, [thread, options]);
+  }, [options]);
 
   const deleteMessage = useCallback(
     (messageId: string) => {
