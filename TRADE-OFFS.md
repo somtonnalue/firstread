@@ -796,7 +796,7 @@ class SendMessageUseCase {
 - ✅ Model selection end-to-end: Clean pass-through
 - ✅ Stop functionality: Added without breaking anything
 
-**If we'd used simple approach:**
+**If a simpler approach was used:**
 - ❌ Adding models: Refactor 10+ files
 - ❌ Swapping providers: Rewrite core logic
 - ❌ Testing: Mock React, complex setup

@@ -14,7 +14,7 @@ Built with **Hexagonal Architecture** and enterprise-grade code organization by 
 
 ## 📖 Documentation
 
-**→ [TRADE-OFFS.md](./TRADE-OFFS.md)** - Architecture decisions, pros/cons, and why we chose Hexagonal Architecture  
+**→ [TRADE-OFFS.md](./TRADE-OFFS.md)** - Architecture decisions, pros/cons, and why I chose Hexagonal Architecture  
 **→ [SETUP.md](./SETUP.md)** - Complete installation and configuration guide
 
 ---
