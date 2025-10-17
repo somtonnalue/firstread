@@ -38,7 +38,7 @@ export default function Home() {
     if (messages.length > 0) {
       if (
         confirm(
-          "Are you sure you want to clear all messages? This cannot be undone.",
+          "Are you sure you want to clear all messages? This cannot be undone."
         )
       ) {
         await clearMessages();
@@ -77,7 +77,7 @@ export default function Home() {
         onModelChange={setSelectedModel}
       />
 
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden mb-8">
         <ChatThread
           messages={messages}
           isLoading={isLoading}
