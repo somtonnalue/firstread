@@ -10,6 +10,15 @@ Built with **Hexagonal Architecture** and enterprise-grade code organization by 
 ![Gemini](https://img.shields.io/badge/Gemini-2.5-4285F4?style=for-the-badge&logo=google)
 ![Architecture](https://img.shields.io/badge/Architecture-Hexagonal-green?style=for-the-badge)
 
+---
+
+## 📖 Documentation
+
+**→ [TRADE-OFFS.md](./TRADE-OFFS.md)** - Architecture decisions, pros/cons, and why we chose Hexagonal Architecture  
+**→ [SETUP.md](./SETUP.md)** - Complete installation and configuration guide
+
+---
+
 ## ✨ Features
 
 ### 🎨 User Experience
