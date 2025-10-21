@@ -69,11 +69,13 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(function
 
   // Fetch chat history
   const fetchThreads = useCallback(async () => {
+    console.log("🔍 [DEBUG] ChatHistory.fetchThreads called");
     try {
       setIsLoading(true);
       const response = await fetch("/api/chat/history");
       if (response.ok) {
         const data = await response.json();
+        console.log("🔍 [DEBUG] Fetched threads:", data.threads?.length || 0);
         setThreads(data.threads || []);
       }
     } catch (error) {

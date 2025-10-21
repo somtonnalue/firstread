@@ -39,6 +39,8 @@ interface UseChatReturn {
  * Uses hexagonal architecture through DI container
  */
 export function useChat(options: UseChatOptions = {}): UseChatReturn {
+  console.log("🔍 [DEBUG] useChat hook initialized");
+  
   const { data: session } = useSession();
   const [thread, setThread] = useState<ChatThread | null>(() => {
     if (options.initialMessages) {
@@ -48,7 +50,8 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         initialThread,
       );
     }
-    return ChatThread.create();
+    // Don't create a thread by default - let the server create it
+    return null;
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -61,7 +64,15 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
 
   const sendMessage = useCallback(
     async (content: string, attachments?: Attachment[]) => {
-      if (!thread) return;
+      console.log("🔍 [DEBUG] sendMessage called");
+      console.log("🔍 [DEBUG] Current thread:", thread?.id || "NO THREAD");
+      console.log("🔍 [DEBUG] Thread messages count:", thread?.messages.length || 0);
+      console.log("🔍 [DEBUG] Content:", content.substring(0, 50) + "...");
+
+      // If there's no thread, we'll create one on the server
+      // If there's a thread with messages, we'll use that threadId
+      const shouldSendThreadId = thread && thread.messages.length > 0;
+      console.log("🔍 [DEBUG] Should send threadId:", shouldSendThreadId);
 
       setIsLoading(true);
       setIsStreaming(true);
@@ -73,7 +84,10 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
       try {
         // Create user message immediately
         const userMessage = Message.create("user", content, attachments);
-        let currentThread = thread.addMessage(userMessage);
+        
+        // If no thread exists, create a temporary one for UI purposes
+        let currentThread = thread || ChatThread.create();
+        currentThread = currentThread.addMessage(userMessage);
         setThread(currentThread);
 
         // Create placeholder for streaming assistant message
@@ -96,11 +110,14 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         let accumulatedContent = "";
 
         // Use streaming use case
-        console.log("Sending message with threadId:", currentThread.id);
+        console.log("🔍 [DEBUG] About to call streamMessageUseCase");
+        console.log("🔍 [DEBUG] Thread ID being sent:", shouldSendThreadId ? currentThread.id : "NO THREAD ID (new thread)");
+        console.log("🔍 [DEBUG] User ID:", session?.user?.id || "anonymous");
+        
         const result = await clientContainer.streamMessageUseCase.execute({
           content,
           attachments,
-          threadId: currentThread.id,
+          threadId: shouldSendThreadId ? currentThread.id : undefined,
           modelId: options.modelId,
           userId: session?.user?.id || "anonymous",
           onChunk: (chunk: string) => {
@@ -128,13 +145,22 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         });
 
         // Update the thread with the final result from the use case
+        console.log("🔍 [DEBUG] StreamMessageUseCase completed");
+        console.log("🔍 [DEBUG] Result thread ID:", result.thread.id);
+        console.log("🔍 [DEBUG] Is new thread:", result.isNewThread);
+        console.log("🔍 [DEBUG] Result thread messages count:", result.thread.messages.length);
+        
         setThread(result.thread);
 
         setStreamingMessageId(null);
 
         // Trigger thread created callback if this was a new thread
-        if (result.thread.messages.length === 2) { // User message + assistant message = new thread
+        if (result.isNewThread) {
+          console.log("🔍 [DEBUG] Triggering onThreadCreated callback");
+          console.log("🔍 [DEBUG] onThreadCreated function exists:", !!options.onThreadCreated);
           options.onThreadCreated?.();
+        } else {
+          console.log("🔍 [DEBUG] NOT triggering onThreadCreated - not a new thread");
         }
 
         // Note: Thread is already saved by the use case, no need to save again
@@ -228,10 +254,11 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
 
   const createNewThread = useCallback(async () => {
     try {
-      const newThread = ChatThread.create();
-      setThread(newThread);
+      // Don't create a thread on the client side
+      // Let the server create it when the first message is sent
+      console.log("🔍 [DEBUG] createNewThread called - clearing current thread");
+      setThread(null);
       setStreamingMessageId(null);
-      console.log("Created new thread:", newThread.id);
     } catch (error) {
       options.onError?.(
         error instanceof Error ? error : new Error("Failed to create new thread"),

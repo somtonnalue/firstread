@@ -5,7 +5,7 @@
 
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import { ChatHeader } from "@/ui/components/chat/chat-header";
 import { ChatInput, type ChatInputRef } from "@/ui/components/chat/chat-input";
@@ -23,10 +23,16 @@ export default function Home() {
   const chatInputRef = useRef<ChatInputRef>(null);
   const chatHistoryRef = useRef<ChatHistoryRef>(null);
 
-  const handleThreadCreated = () => {
+  const handleThreadCreated = useCallback(() => {
     // Refresh chat history when a new thread is created
-    chatHistoryRef.current?.refreshHistory();
-  };
+    console.log("🔍 [DEBUG] handleThreadCreated called - refreshing chat history");
+    console.log("🔍 [DEBUG] chatHistoryRef.current exists:", !!chatHistoryRef.current);
+    
+    // Add a small delay to prevent rapid successive calls
+    setTimeout(() => {
+      chatHistoryRef.current?.refreshHistory();
+    }, 100);
+  }, []);
 
   const {
     messages,

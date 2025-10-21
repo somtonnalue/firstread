@@ -10,6 +10,10 @@ import { Message } from "@/domain/entities/Message";
 
 export class PrismaChatRepository implements IChatRepository {
   async getThread(threadId: string, userId?: string): Promise<ChatThread | null> {
+    console.log("🔍 [DEBUG] PrismaChatRepository.getThread called");
+    console.log("🔍 [DEBUG] ThreadId:", threadId);
+    console.log("🔍 [DEBUG] UserId:", userId || "NO USER ID");
+    
     const whereClause: any = { id: threadId };
     if (userId) {
       whereClause.userId = userId;
@@ -24,7 +28,13 @@ export class PrismaChatRepository implements IChatRepository {
       },
     });
 
-    if (!threadData) return null;
+    if (!threadData) {
+      console.log("🔍 [DEBUG] Thread not found in database:", threadId);
+      return null;
+    }
+
+    console.log("🔍 [DEBUG] Thread found in database:", threadData.id);
+    console.log("🔍 [DEBUG] Thread messages count:", threadData.messages.length);
 
     const messages = threadData.messages.map(
       (msg: any) =>
@@ -87,6 +97,12 @@ export class PrismaChatRepository implements IChatRepository {
   }
 
   async saveThread(thread: ChatThread, userId: string): Promise<void> {
+    console.log("🔍 [DEBUG] PrismaChatRepository.saveThread called");
+    console.log("🔍 [DEBUG] Thread ID:", thread.id);
+    console.log("🔍 [DEBUG] Thread title:", thread.title);
+    console.log("🔍 [DEBUG] Thread messages count:", thread.messages.length);
+    console.log("🔍 [DEBUG] User ID:", userId);
+    
     await prisma.chatThread.upsert({
       where: { id: thread.id },
       create: {

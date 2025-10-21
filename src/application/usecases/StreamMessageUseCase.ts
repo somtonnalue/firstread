@@ -22,6 +22,7 @@ export interface StreamMessageOutput {
   userMessage: Message;
   assistantMessage: Message;
   thread: ChatThread;
+  isNewThread: boolean;
 }
 
 /**
@@ -34,13 +35,23 @@ export class StreamMessageUseCase {
   ) {}
 
   async execute(input: StreamMessageInput): Promise<StreamMessageOutput> {
+    console.log("🔍 [DEBUG] StreamMessageUseCase.execute called");
+    console.log("🔍 [DEBUG] Input threadId:", input.threadId || "NO THREAD ID");
+    console.log("🔍 [DEBUG] Input userId:", input.userId);
+    
     // 1. Get or create thread
     let thread = input.threadId
       ? await this.chatRepository.getThread(input.threadId, input.userId)
       : null;
 
+    console.log("🔍 [DEBUG] Retrieved thread:", thread?.id || "NO THREAD FOUND");
+    
+    const isNewThread = !thread;
     if (!thread) {
       thread = ChatThread.create();
+      console.log("🔍 [DEBUG] Created new thread:", thread.id);
+    } else {
+      console.log("🔍 [DEBUG] Using existing thread:", thread.id);
     }
 
     // 2. Create user message
@@ -66,12 +77,18 @@ export class StreamMessageUseCase {
     thread = thread.addMessage(assistantMessage);
 
     // 6. Persist thread
+    console.log("🔍 [DEBUG] About to save thread:", thread.id);
+    console.log("🔍 [DEBUG] Thread messages count:", thread.messages.length);
+    console.log("🔍 [DEBUG] Is new thread:", isNewThread);
+    
     await this.chatRepository.saveThread(thread, input.userId);
+    console.log("🔍 [DEBUG] Thread saved successfully");
 
     return {
       userMessage,
       assistantMessage,
       thread,
+      isNewThread,
     };
   }
 }
