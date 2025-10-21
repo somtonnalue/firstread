@@ -8,6 +8,8 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/infra/database/prisma";
 import { z } from "zod";
 
+export const runtime = "nodejs";
+
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -27,7 +29,7 @@ export async function POST(request: NextRequest) {
     if (existingUser) {
       return NextResponse.json(
         { error: "User with this email already exists" },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
@@ -48,20 +50,20 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { message: "User created successfully", user: userWithoutPassword },
-      { status: 201 },
+      { status: 201 }
     );
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Validation error", details: error.issues },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     console.error("Registration error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

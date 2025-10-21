@@ -6,6 +6,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/infra/database/prisma";
+
+export const runtime = "nodejs";
 import { z } from "zod";
 
 const CreateThreadSchema = z.object({
