@@ -12,23 +12,23 @@ import type { IChatRepository } from "@/ports/IChatRepository";
 export class ManageChatThreadUseCase {
   constructor(private readonly chatRepository: IChatRepository) {}
 
-  async clearThread(threadId: string): Promise<ChatThread> {
-    const thread = await this.chatRepository.getThread(threadId);
+  async clearThread(threadId: string, userId?: string): Promise<ChatThread> {
+    const thread = await this.chatRepository.getThread(threadId, userId);
     if (!thread) {
       throw new Error(`Thread ${threadId} not found`);
     }
 
     const clearedThread = thread.clear();
-    await this.chatRepository.updateThread(clearedThread);
+    await this.chatRepository.updateThread(clearedThread, userId || "anonymous");
     return clearedThread;
   }
 
-  async deleteThread(threadId: string): Promise<void> {
-    await this.chatRepository.deleteThread(threadId);
+  async deleteThread(threadId: string, userId?: string): Promise<void> {
+    await this.chatRepository.deleteThread(threadId, userId);
   }
 
-  async exportThread(threadId: string): Promise<string> {
-    const thread = await this.chatRepository.getThread(threadId);
+  async exportThread(threadId: string, userId?: string): Promise<string> {
+    const thread = await this.chatRepository.getThread(threadId, userId);
     if (!thread) {
       throw new Error(`Thread ${threadId} not found`);
     }
@@ -46,7 +46,7 @@ export class ManageChatThreadUseCase {
     );
   }
 
-  async getAllThreads(): Promise<ChatThread[]> {
-    return this.chatRepository.getAllThreads();
+  async getAllThreads(userId?: string): Promise<ChatThread[]> {
+    return this.chatRepository.getAllThreads(userId);
   }
 }

@@ -20,7 +20,7 @@ export const ApiMessageSchema = z.object({
   content: z.string(),
   timestamp: z.coerce.date(), // Accepts string and converts to Date
   isStreaming: z.boolean().optional(),
-  attachments: z.array(AttachmentSchema).optional(),
+  attachments: z.array(AttachmentSchema).optional().nullable().transform(val => val === null ? undefined : val),
 });
 
 /**

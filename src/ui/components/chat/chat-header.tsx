@@ -29,6 +29,7 @@ interface ChatHeaderProps {
   onExportChat?: () => void;
   selectedModel?: string;
   onModelChange?: (modelId: string) => void;
+  authButton?: React.ReactNode;
 }
 
 export function ChatHeader({
@@ -36,6 +37,7 @@ export function ChatHeader({
   onExportChat,
   selectedModel = "gemini-2.5-flash",
   onModelChange,
+  authButton,
 }: ChatHeaderProps) {
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -66,6 +68,8 @@ export function ChatHeader({
           </Select>
 
           <ThemeToggle />
+
+          {authButton}
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

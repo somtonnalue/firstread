@@ -87,12 +87,14 @@ export class ApiChatService implements IChatService {
     context: Message[],
     onChunk: (chunk: string) => void,
     modelId?: string,
+    threadId?: string,
   ): Promise<Message> {
     try {
       const requestBody: ChatRequest = {
         content,
         attachments,
         modelId,
+        threadId,
         context: context?.map((msg) => ({
           id: msg.id,
           role: msg.role,
@@ -116,7 +118,9 @@ export class ApiChatService implements IChatService {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to stream message");
+        const errorText = await response.text();
+        console.error("Stream API Error:", response.status, errorText);
+        throw new Error(`Failed to stream message: ${response.status} ${errorText}`);
       }
 
       const reader = response.body?.getReader();
@@ -150,6 +154,7 @@ export class ApiChatService implements IChatService {
                 fullResponse += parsed.chunk;
                 onChunk(parsed.chunk);
               }
+              // Note: We ignore threadId updates here as they're handled by the use case
             } catch (_e) {
               // Ignore parse errors for incomplete chunks
             }

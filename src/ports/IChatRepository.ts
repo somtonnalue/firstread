@@ -9,25 +9,25 @@ export interface IChatRepository {
   /**
    * Save a chat thread
    */
-  saveThread(thread: ChatThread): Promise<void>;
+  saveThread(thread: ChatThread, userId: string): Promise<void>;
 
   /**
    * Get a chat thread by ID
    */
-  getThread(threadId: string): Promise<ChatThread | null>;
+  getThread(threadId: string, userId?: string): Promise<ChatThread | null>;
 
   /**
    * Get all chat threads
    */
-  getAllThreads(): Promise<ChatThread[]>;
+  getAllThreads(userId?: string): Promise<ChatThread[]>;
 
   /**
    * Delete a chat thread
    */
-  deleteThread(threadId: string): Promise<void>;
+  deleteThread(threadId: string, userId?: string): Promise<void>;
 
   /**
    * Update a chat thread
    */
-  updateThread(thread: ChatThread): Promise<void>;
+  updateThread(thread: ChatThread, userId: string): Promise<void>;
 }

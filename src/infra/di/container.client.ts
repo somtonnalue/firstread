@@ -4,7 +4,7 @@
  */
 
 import { ApiChatService } from "@/adapters/ApiChatService";
-import { InMemoryChatRepository } from "@/adapters/InMemoryChatRepository";
+import { ApiChatRepository } from "@/adapters/ApiChatRepository";
 import { ManageChatThreadUseCase } from "@/application/usecases/ManageChatThreadUseCase";
 import { SendMessageUseCase } from "@/application/usecases/SendMessageUseCase";
 import { StreamMessageUseCase } from "@/application/usecases/StreamMessageUseCase";
@@ -28,7 +28,7 @@ export class ClientContainer {
     // Initialize adapters
     // Frontend uses API adapter to call backend
     this._chatService = new ApiChatService();
-    this._chatRepository = new InMemoryChatRepository();
+    this._chatRepository = new ApiChatRepository();
 
     // Initialize use cases with dependencies
     this._sendMessageUseCase = new SendMessageUseCase(

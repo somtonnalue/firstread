@@ -14,6 +14,7 @@ export interface SendMessageInput {
   attachments?: Attachment[];
   threadId?: string;
   modelId?: string;
+  userId: string;
 }
 
 export interface SendMessageOutput {
@@ -35,7 +36,7 @@ export class SendMessageUseCase {
   async execute(input: SendMessageInput): Promise<SendMessageOutput> {
     // 1. Get or create thread
     let thread = input.threadId
-      ? await this.chatRepository.getThread(input.threadId)
+      ? await this.chatRepository.getThread(input.threadId, input.userId)
       : null;
 
     if (!thread) {
@@ -64,7 +65,7 @@ export class SendMessageUseCase {
     thread = thread.addMessage(assistantMessage);
 
     // 6. Persist thread
-    await this.chatRepository.updateThread(thread);
+    await this.chatRepository.updateThread(thread, input.userId);
 
     return {
       userMessage,

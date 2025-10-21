@@ -1,99 +1,36 @@
 /**
- * Home Page - Entry point for the chat application
- * Uses Hexagonal Architecture through dependency injection
+ * Landing Page - Presentation Layer
+ * Simple redirect to authentication
  */
 
 "use client";
 
-import { useRef, useState } from "react";
-import { toast } from "sonner";
-import { ChatHeader } from "@/ui/components/chat/chat-header";
-import { ChatInput, type ChatInputRef } from "@/ui/components/chat/chat-input";
-import { ChatThread } from "@/ui/components/chat/chat-thread";
-import { useChat } from "@/ui/hooks/useChat";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-export default function Home() {
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
-  const chatInputRef = useRef<ChatInputRef>(null);
+export default function LandingPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
 
-  const {
-    messages,
-    isLoading,
-    isStreaming,
-    streamingMessageId,
-    sendMessage,
-    stopStreaming,
-    clearMessages,
-    exportChat,
-  } = useChat({
-    modelId: selectedModel,
-    onError: (error) => {
-      toast.error("Failed to send message", {
-        description: error.message,
-      });
-    },
-  });
-
-  const handleClearChat = async () => {
-    if (messages.length > 0) {
-      if (
-        confirm(
-          "Are you sure you want to clear all messages? This cannot be undone."
-        )
-      ) {
-        await clearMessages();
-        toast.success("Chat cleared");
-      }
+  useEffect(() => {
+    if (session) {
+      router.push("/chat");
+    } else {
+      router.push("/auth/register");
     }
-  };
+  }, [session, router]);
 
-  const handleExportChat = async () => {
-    const chatData = await exportChat();
-    if (!chatData) return;
-
-    const blob = new Blob([chatData], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `chat-export-${new Date().toISOString()}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success("Chat exported successfully");
-  };
-
-  const handlePromptClick = (prompt: string) => {
-    chatInputRef.current?.setValue(prompt);
-    chatInputRef.current?.focus();
-  };
-
-  return (
-    <div className="flex h-screen flex-col">
-      <ChatHeader
-        onClearChat={handleClearChat}
-        onExportChat={handleExportChat}
-        selectedModel={selectedModel}
-        onModelChange={setSelectedModel}
-      />
-
-      <div className="flex-1 overflow-hidden mb-8">
-        <ChatThread
-          messages={messages}
-          isLoading={isLoading}
-          isStreaming={isStreaming}
-          streamingMessageId={streamingMessageId}
-          onPromptClick={handlePromptClick}
-        />
+  if (status === "loading") {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       </div>
+    );
+  }
 
-      <ChatInput
-        ref={chatInputRef}
-        onSend={sendMessage}
-        onStop={stopStreaming}
-        isLoading={isLoading}
-        isStreaming={isStreaming}
-      />
-    </div>
-  );
+  return null; // Will redirect via useEffect
 }

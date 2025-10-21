@@ -5,14 +5,25 @@
 
 import { Message } from "@/domain/entities/Message";
 import { serverContainer } from "@/infra/di/container.server";
+import { auth } from "@/lib/auth";
 import { ChatStreamRequestSchema } from "@/shared/contracts/api.contract";
 
 export const runtime = "edge";
 
 export async function POST(request: Request) {
   try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return new Response(
+        JSON.stringify({ error: "Unauthorized" }),
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     // Parse and validate request body
     const body = await request.json();
+    console.log("Stream API received:", { threadId: body.threadId, content: body.content?.substring(0, 50) });
     const validatedData = ChatStreamRequestSchema.parse(body);
 
     // Convert context to Message entities if provided
@@ -36,11 +47,12 @@ export async function POST(request: Request) {
     // Execute streaming use case in the background
     (async () => {
       try {
-        await serverContainer.streamMessageUseCase.execute({
+        const result = await serverContainer.streamMessageUseCase.execute({
           content: validatedData.content,
           attachments: validatedData.attachments,
           threadId: validatedData.threadId,
           modelId: validatedData.modelId,
+          userId: session.user!.id!,
           onChunk: (chunk: string) => {
             // Send each chunk to the client
             writer.write(
@@ -48,6 +60,11 @@ export async function POST(request: Request) {
             );
           },
         });
+
+        // Send the final thread ID to the client
+        writer.write(
+          encoder.encode(`data: ${JSON.stringify({ threadId: result.thread.id })}\n\n`),
+        );
 
         // Send done signal
         writer.write(encoder.encode("data: [DONE]\n\n"));
@@ -74,13 +91,28 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Stream API Error:", error);
 
+    // Handle Zod validation errors
+    if (error instanceof Error && error.name === "ZodError") {
+      return new Response(
+        JSON.stringify({
+          error: "Validation Error",
+          message: error.message,
+          details: (error as any).issues,
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
     return new Response(
       JSON.stringify({
-        error: "Validation Error",
+        error: "Internal Server Error",
         message: error instanceof Error ? error.message : "Unknown error",
       }),
       {
-        status: 400,
+        status: 500,
         headers: { "Content-Type": "application/json" },
       },
     );

@@ -14,6 +14,7 @@ export interface StreamMessageInput {
   attachments?: Attachment[];
   threadId?: string;
   modelId?: string;
+  userId: string;
   onChunk: (content: string) => void;
 }
 
@@ -35,7 +36,7 @@ export class StreamMessageUseCase {
   async execute(input: StreamMessageInput): Promise<StreamMessageOutput> {
     // 1. Get or create thread
     let thread = input.threadId
-      ? await this.chatRepository.getThread(input.threadId)
+      ? await this.chatRepository.getThread(input.threadId, input.userId)
       : null;
 
     if (!thread) {
@@ -65,7 +66,7 @@ export class StreamMessageUseCase {
     thread = thread.addMessage(assistantMessage);
 
     // 6. Persist thread
-    await this.chatRepository.updateThread(thread);
+    await this.chatRepository.saveThread(thread, input.userId);
 
     return {
       userMessage,

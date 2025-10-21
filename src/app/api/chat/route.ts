@@ -6,6 +6,7 @@
 import { NextResponse } from "next/server";
 import { Message } from "@/domain/entities/Message";
 import { serverContainer } from "@/infra/di/container.server";
+import { auth } from "@/lib/auth";
 import {
   ChatRequestSchema,
   type ChatResponse,
@@ -16,6 +17,15 @@ export const runtime = "edge"; // Optional: Use edge runtime for better performa
 
 export async function POST(request: Request) {
   try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
     // Parse and validate request body
     const body = await request.json();
     const validatedData = ChatRequestSchema.parse(body);
@@ -39,6 +49,7 @@ export async function POST(request: Request) {
       attachments: validatedData.attachments,
       threadId: validatedData.threadId,
       modelId: validatedData.modelId,
+      userId: session.user!.id!,
     });
 
     // Build response

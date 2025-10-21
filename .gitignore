@@ -48,3 +48,4 @@ bun.lockb
 .cursor
 personal-docs
 generated-terms-of-service
+/src/generated/prisma

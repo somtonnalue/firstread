@@ -6,6 +6,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { useSession } from "next-auth/react";
 import { ChatThread } from "@/domain/entities/ChatThread";
 import { Message } from "@/domain/entities/Message";
 import { clientContainer } from "@/infra/di/container.client";
@@ -16,19 +17,21 @@ interface UseChatOptions {
   threadId?: string;
   modelId?: string;
   onError?: (error: Error) => void;
+  onThreadCreated?: () => void;
 }
 
 interface UseChatReturn {
   messages: Message[];
-  thread: ChatThread | null;
   isLoading: boolean;
-  streamingMessageId: string | null;
   isStreaming: boolean;
+  streamingMessageId: string | null;
+  currentThread: ChatThread | null;
   sendMessage: (content: string, attachments?: Attachment[]) => Promise<void>;
   stopStreaming: () => void;
   clearMessages: () => Promise<void>;
-  deleteMessage: (messageId: string) => void;
-  exportChat: () => Promise<string>;
+  exportChat: () => Promise<string | null>;
+  switchToThread: (threadId: string) => Promise<void>;
+  createNewThread: () => Promise<void>;
 }
 
 /**
@@ -36,6 +39,7 @@ interface UseChatReturn {
  * Uses hexagonal architecture through DI container
  */
 export function useChat(options: UseChatOptions = {}): UseChatReturn {
+  const { data: session } = useSession();
   const [thread, setThread] = useState<ChatThread | null>(() => {
     if (options.initialMessages) {
       const initialThread = ChatThread.create();
@@ -92,11 +96,13 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         let accumulatedContent = "";
 
         // Use streaming use case
-        await clientContainer.streamMessageUseCase.execute({
+        console.log("Sending message with threadId:", currentThread.id);
+        const result = await clientContainer.streamMessageUseCase.execute({
           content,
           attachments,
           threadId: currentThread.id,
           modelId: options.modelId,
+          userId: session?.user?.id || "anonymous",
           onChunk: (chunk: string) => {
             accumulatedContent += chunk;
 
@@ -121,23 +127,17 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
           },
         });
 
-        // Mark streaming as complete
-        setThread((prevThread) => {
-          if (!prevThread) return prevThread;
-
-          const finalMessage = new Message(
-            assistantMessageId,
-            "assistant",
-            accumulatedContent,
-            new Date(),
-            undefined,
-            false,
-          );
-
-          return prevThread.updateMessage(assistantMessageId, finalMessage);
-        });
+        // Update the thread with the final result from the use case
+        setThread(result.thread);
 
         setStreamingMessageId(null);
+
+        // Trigger thread created callback if this was a new thread
+        if (result.thread.messages.length === 2) { // User message + assistant message = new thread
+          options.onThreadCreated?.();
+        }
+
+        // Note: Thread is already saved by the use case, no need to save again
       } catch (error) {
         setStreamingMessageId(null);
 
@@ -201,6 +201,44 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     }
   }, [options]);
 
+  const switchToThread = useCallback(async (threadId: string) => {
+    try {
+      setIsLoading(true);
+      const thread = await clientContainer.chatRepository.getThread(threadId, session?.user?.id);
+      if (thread) {
+        setThread(thread);
+        setStreamingMessageId(null);
+      } else {
+        // If thread not found, create a new one with the same ID
+        console.warn(`Thread ${threadId} not found, creating new thread`);
+        const newThread = ChatThread.create();
+        setThread(newThread);
+        setStreamingMessageId(null);
+      }
+    } catch (error) {
+      console.error("Failed to switch thread:", error);
+      // Create a new thread as fallback
+      const newThread = ChatThread.create();
+      setThread(newThread);
+      setStreamingMessageId(null);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [options, session?.user?.id]);
+
+  const createNewThread = useCallback(async () => {
+    try {
+      const newThread = ChatThread.create();
+      setThread(newThread);
+      setStreamingMessageId(null);
+      console.log("Created new thread:", newThread.id);
+    } catch (error) {
+      options.onError?.(
+        error instanceof Error ? error : new Error("Failed to create new thread"),
+      );
+    }
+  }, [options]);
+
   const deleteMessage = useCallback(
     (messageId: string) => {
       if (!thread) return;
@@ -209,31 +247,33 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
     [thread],
   );
 
-  const exportChat = useCallback(async (): Promise<string> => {
-    if (!thread) return "";
+  const exportChat = useCallback(async (): Promise<string | null> => {
+    if (!thread) return null;
 
     try {
       return await clientContainer.manageChatThreadUseCase.exportThread(
         thread.id,
+        session?.user?.id,
       );
     } catch (error) {
       options.onError?.(
         error instanceof Error ? error : new Error("Failed to export chat"),
       );
-      return "";
+      return null;
     }
-  }, [thread, options]);
+  }, [thread, options, session?.user?.id]);
 
   return {
     messages: thread?.messages || [],
-    thread,
     isLoading,
-    streamingMessageId,
     isStreaming,
+    streamingMessageId,
+    currentThread: thread,
     sendMessage,
     stopStreaming,
     clearMessages,
-    deleteMessage,
     exportChat,
+    switchToThread,
+    createNewThread,
   };
 }

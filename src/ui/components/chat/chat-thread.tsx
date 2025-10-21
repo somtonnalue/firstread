@@ -71,7 +71,7 @@ export function ChatThread({
               type="button"
               onClick={() =>
                 onPromptClick?.(
-                  "Generate a comprehensive Terms of Service for FirstRead, an AI-powered document generation platform. Include user accounts, subscription billing, data usage, intellectual property, and termination clauses."
+                  "Generate a comprehensive Terms of Service for FirstRead, an AI-powered document generation platform. Include user accounts, subscription billing, data usage, intellectual property, and termination clauses.",
                 )
               }
               className="rounded-lg border bg-card p-3 text-sm hover:bg-accent hover:border-purple-500 transition-colors text-left"
@@ -87,7 +87,7 @@ export function ChatThread({
               type="button"
               onClick={() =>
                 onPromptClick?.(
-                  "Generate a GDPR and CCPA compliant Privacy Policy for FirstRead. Include data collection, user rights, cookie policy, data retention, and international data transfers."
+                  "Generate a GDPR and CCPA compliant Privacy Policy for FirstRead. Include data collection, user rights, cookie policy, data retention, and international data transfers.",
                 )
               }
               className="rounded-lg border bg-card p-3 text-sm hover:bg-accent hover:border-purple-500 transition-colors text-left"
@@ -101,7 +101,7 @@ export function ChatThread({
               type="button"
               onClick={() =>
                 onPromptClick?.(
-                  "Generate a SaaS Master Services Agreement for FirstRead. Include scope of services, payment terms, SLA commitments, data processing agreement, IP ownership, warranties, indemnification, and dispute resolution."
+                  "Generate a SaaS Master Services Agreement for FirstRead. Include scope of services, payment terms, SLA commitments, data processing agreement, IP ownership, warranties, indemnification, and dispute resolution.",
                 )
               }
               className="rounded-lg border bg-card p-3 text-sm hover:bg-accent hover:border-purple-500 transition-colors text-left"
