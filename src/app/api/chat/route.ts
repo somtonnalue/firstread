@@ -13,7 +13,7 @@ import {
   type ErrorResponse,
 } from "@/shared/contracts/api.contract";
 
-export const runtime = "edge"; // Optional: Use edge runtime for better performance
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
