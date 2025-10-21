@@ -9,6 +9,7 @@ export interface UserProps {
   email: string;
   emailVerified?: Date;
   image?: string;
+  approved: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -36,6 +37,10 @@ export class User {
     return this.props.image;
   }
 
+  get approved(): boolean {
+    return this.props.approved;
+  }
+
   get createdAt(): Date {
     return this.props.createdAt;
   }
@@ -56,6 +61,16 @@ export class User {
 
   verifyEmail(): void {
     this.props.emailVerified = new Date();
+    this.props.updatedAt = new Date();
+  }
+
+  approve(): void {
+    this.props.approved = true;
+    this.props.updatedAt = new Date();
+  }
+
+  revokeApproval(): void {
+    this.props.approved = false;
     this.props.updatedAt = new Date();
   }
 

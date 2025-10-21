@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         password: hashedPassword,
+        approved: false, // New users are not approved by default
       },
     });
 

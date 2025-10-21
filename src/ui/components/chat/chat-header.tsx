@@ -28,6 +28,7 @@ interface ChatHeaderProps {
   onClearChat?: () => void;
   onExportChat?: () => void;
   selectedModel?: string;
+  sidebarOpen?: boolean;
   onModelChange?: (modelId: string) => void;
   authButton?: React.ReactNode;
 }
@@ -35,13 +36,14 @@ interface ChatHeaderProps {
 export function ChatHeader({
   onClearChat,
   onExportChat,
+  sidebarOpen,
   selectedModel = "gemini-2.5-flash",
   onModelChange,
   authButton,
 }: ChatHeaderProps) {
   return (
     <header className="sticky top-0 z-10 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="flex h-14 items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className={`flex h-14 ${sidebarOpen ? "w-[calc(100vw_-_400px)]" : "w-[calc(100vw_-_60px)]"} items-center justify-between px-4 sm:px-6 lg:px-8`}>
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2">
             <h1 className="text-lg font-semibold tracking-tight">FirstRead</h1>

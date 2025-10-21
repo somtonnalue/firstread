@@ -21,6 +21,7 @@ export class PrismaUserRepository implements IUserRepository {
       email: userData.email,
       emailVerified: userData.emailVerified ?? undefined,
       image: userData.image ?? undefined,
+      approved: userData.approved,
       createdAt: userData.createdAt,
       updatedAt: userData.updatedAt,
     });
@@ -39,6 +40,7 @@ export class PrismaUserRepository implements IUserRepository {
       email: userData.email,
       emailVerified: userData.emailVerified ?? undefined,
       image: userData.image ?? undefined,
+      approved: userData.approved,
       createdAt: userData.createdAt,
       updatedAt: userData.updatedAt,
     });
@@ -52,6 +54,7 @@ export class PrismaUserRepository implements IUserRepository {
         email: user.email,
         emailVerified: user.emailVerified,
         image: user.image,
+        approved: user.approved,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
       },
@@ -63,6 +66,7 @@ export class PrismaUserRepository implements IUserRepository {
       email: userData.email,
       emailVerified: userData.emailVerified ?? undefined,
       image: userData.image ?? undefined,
+      approved: userData.approved,
       createdAt: userData.createdAt,
       updatedAt: userData.updatedAt,
     });
@@ -76,6 +80,7 @@ export class PrismaUserRepository implements IUserRepository {
         email: user.email,
         emailVerified: user.emailVerified,
         image: user.image,
+        approved: user.approved,
         updatedAt: user.updatedAt,
       },
     });
@@ -86,6 +91,7 @@ export class PrismaUserRepository implements IUserRepository {
       email: userData.email,
       emailVerified: userData.emailVerified ?? undefined,
       image: userData.image ?? undefined,
+      approved: userData.approved,
       createdAt: userData.createdAt,
       updatedAt: userData.updatedAt,
     });

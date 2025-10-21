@@ -41,11 +41,17 @@ export default function SignInPage() {
         redirect: false,
       });
 
-      if (result?.error) {
-        setError("Invalid email or password");
-      } else {
-        router.push("/chat");
-      }
+        if (result?.error) {
+          if (result.error === "CredentialsSignin") {
+            setError("Invalid email or password");
+          } else if (result.error.includes("not approved")) {
+            setError("Your account is pending approval. Please contact the administrator.");
+          } else {
+            setError("An error occurred. Please try again.");
+          }
+        } else {
+          router.push("/chat");
+        }
     } catch (error) {
       setError("An error occurred. Please try again.");
     } finally {

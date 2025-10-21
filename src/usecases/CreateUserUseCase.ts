@@ -26,6 +26,7 @@ export class CreateUserUseCase {
       name: request.name,
       email: request.email,
       image: request.image,
+      approved: false, // New users are not approved by default
     });
 
     const createdUser = await this.userRepository.create(user);

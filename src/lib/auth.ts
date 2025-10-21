@@ -40,6 +40,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           return null;
         }
 
+        // Check if user is approved
+        if (!user.approved) {
+          throw new Error("Account not approved. Please contact administrator.");
+        }
+
         return {
           id: user.id,
           email: user.email,

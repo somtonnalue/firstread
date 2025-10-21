@@ -57,7 +57,7 @@ export default function RegisterPage() {
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/auth/signin");
+        router.push("/auth/signin?message=Your account is pending approval");
       }, 2000);
     } catch (error) {
       setError("An error occurred. Please try again.");
@@ -75,7 +75,7 @@ export default function RegisterPage() {
               Registration Successful!
             </CardTitle>
             <CardDescription>
-              Your account has been created. Redirecting to sign in...
+              Your account has been created and is pending approval. Redirecting to sign in...
             </CardDescription>
           </CardHeader>
         </Card>

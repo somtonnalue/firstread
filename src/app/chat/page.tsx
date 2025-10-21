@@ -127,6 +127,7 @@ export default function Home() {
             <ChatHeader
               onClearChat={handleClearChat}
               onExportChat={handleExportChat}
+              sidebarOpen={sidebarOpen}
               selectedModel={selectedModel}
               onModelChange={setSelectedModel}
               authButton={<AuthButton />}
