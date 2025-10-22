@@ -87,6 +87,8 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         
         // If no thread exists, create a temporary one for UI purposes
         let currentThread = thread || ChatThread.create();
+        const threadIdToSend = shouldSendThreadId ? currentThread.id : undefined;
+        
         currentThread = currentThread.addMessage(userMessage);
         setThread(currentThread);
 
@@ -109,18 +111,16 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
 
         let accumulatedContent = "";
 
-        // Use streaming use case
-        console.log("🔍 [DEBUG] About to call streamMessageUseCase");
-        console.log("🔍 [DEBUG] Thread ID being sent:", shouldSendThreadId ? currentThread.id : "NO THREAD ID (new thread)");
+        // Call API directly - server handles all business logic
+        console.log("🔍 [DEBUG] About to call API chatService.streamMessage");
+        console.log("🔍 [DEBUG] Thread ID being sent:", threadIdToSend || "NO THREAD ID (new thread)");
         console.log("🔍 [DEBUG] User ID:", session?.user?.id || "anonymous");
         
-        const result = await clientContainer.streamMessageUseCase.execute({
+        const result = await clientContainer.chatService.streamMessage(
           content,
           attachments,
-          threadId: shouldSendThreadId ? currentThread.id : undefined,
-          modelId: options.modelId,
-          userId: session?.user?.id || "anonymous",
-          onChunk: (chunk: string) => {
+          currentThread.messages.filter(msg => msg.id !== assistantMessageId), // Don't send the placeholder
+          (chunk: string) => {
             accumulatedContent += chunk;
 
             // Update the streaming message with accumulated content
@@ -142,16 +142,38 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
               );
             });
           },
-        });
+          options.modelId,
+          threadIdToSend,
+        );
 
-        // Update the thread with the final result from the use case
-        console.log("🔍 [DEBUG] StreamMessageUseCase completed");
-        console.log("🔍 [DEBUG] Result thread ID:", result.thread.id);
+        // Update thread with the server-returned threadId
+        console.log("🔍 [DEBUG] API streaming completed");
+        console.log("🔍 [DEBUG] Result thread ID:", result.threadId);
         console.log("🔍 [DEBUG] Is new thread:", result.isNewThread);
-        console.log("🔍 [DEBUG] Result thread messages count:", result.thread.messages.length);
         
-        setThread(result.thread);
-
+        // Update the thread ID if it was a new thread
+        if (result.isNewThread && result.threadId) {
+          currentThread = new ChatThread(
+            result.threadId,
+            currentThread.title,
+            currentThread.messages,
+            currentThread.createdAt,
+            new Date(),
+          );
+        }
+        
+        // Update the assistant message with the final content
+        const finalAssistantMessage = new Message(
+          assistantMessageId,
+          "assistant",
+          accumulatedContent,
+          new Date(),
+          undefined,
+          false, // Not streaming anymore
+        );
+        
+        currentThread = currentThread.updateMessage(assistantMessageId, finalAssistantMessage);
+        setThread(currentThread);
         setStreamingMessageId(null);
 
         // Trigger thread created callback if this was a new thread
@@ -163,7 +185,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
           console.log("🔍 [DEBUG] NOT triggering onThreadCreated - not a new thread");
         }
 
-        // Note: Thread is already saved by the use case, no need to save again
+        // Note: Thread is already saved by the server, no need to save again
       } catch (error) {
         setStreamingMessageId(null);
 
@@ -177,7 +199,7 @@ export function useChat(options: UseChatOptions = {}): UseChatReturn {
         setAbortController(null);
       }
     },
-    [thread, options],
+    [thread, options, session?.user?.id],
   );
 
   const stopStreaming = useCallback(() => {

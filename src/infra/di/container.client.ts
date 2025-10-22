@@ -1,13 +1,14 @@
 /**
  * Client-side Dependency Injection Container
  * Uses API adapter for frontend
+ * 
+ * NOTE: Client container should NOT contain use cases.
+ * Use cases run on the server only. Client only calls APIs.
  */
 
 import { ApiChatService } from "@/adapters/ApiChatService";
 import { ApiChatRepository } from "@/adapters/ApiChatRepository";
 import { ManageChatThreadUseCase } from "@/application/usecases/ManageChatThreadUseCase";
-import { SendMessageUseCase } from "@/application/usecases/SendMessageUseCase";
-import { StreamMessageUseCase } from "@/application/usecases/StreamMessageUseCase";
 import type { IChatRepository } from "@/ports/IChatRepository";
 import type { IChatService } from "@/ports/IChatService";
 
@@ -20,8 +21,6 @@ export class ClientContainer {
 
   private _chatService: ApiChatService;
   private _chatRepository: IChatRepository;
-  private _sendMessageUseCase: SendMessageUseCase;
-  private _streamMessageUseCase: StreamMessageUseCase;
   private _manageChatThreadUseCase: ManageChatThreadUseCase;
 
   private constructor() {
@@ -30,17 +29,8 @@ export class ClientContainer {
     this._chatService = new ApiChatService();
     this._chatRepository = new ApiChatRepository();
 
-    // Initialize use cases with dependencies
-    this._sendMessageUseCase = new SendMessageUseCase(
-      this._chatService,
-      this._chatRepository,
-    );
-
-    this._streamMessageUseCase = new StreamMessageUseCase(
-      this._chatService,
-      this._chatRepository,
-    );
-
+    // Only thread management use case - for reading/managing existing threads
+    // Sending messages is handled by server-side use cases
     this._manageChatThreadUseCase = new ManageChatThreadUseCase(
       this._chatRepository,
     );
@@ -59,14 +49,6 @@ export class ClientContainer {
 
   get chatRepository(): IChatRepository {
     return this._chatRepository;
-  }
-
-  get sendMessageUseCase(): SendMessageUseCase {
-    return this._sendMessageUseCase;
-  }
-
-  get streamMessageUseCase(): StreamMessageUseCase {
-    return this._streamMessageUseCase;
   }
 
   get manageChatThreadUseCase(): ManageChatThreadUseCase {

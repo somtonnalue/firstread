@@ -1,17 +1,20 @@
 /**
  * API Chat Service Adapter (Frontend)
  * Presentation layer adapter - calls backend API
+ * 
+ * NOTE: This adapter calls the backend API and does NOT implement IChatService
+ * because it has a different contract (returns thread metadata).
+ * IChatService is for server-side implementations only.
  */
 
 import { Message } from "@/domain/entities/Message";
-import type { IChatService } from "@/ports/IChatService";
 import type {
   ChatRequest,
   ChatResponse,
 } from "@/shared/contracts/api.contract";
 import type { Attachment } from "@/shared/contracts/chat.contract";
 
-export class ApiChatService implements IChatService {
+export class ApiChatService {
   private baseUrl: string;
   private abortController: AbortController | null = null;
 
@@ -88,7 +91,7 @@ export class ApiChatService implements IChatService {
     onChunk: (chunk: string) => void,
     modelId?: string,
     threadId?: string,
-  ): Promise<Message> {
+  ): Promise<{ message: Message; threadId: string; isNewThread: boolean }> {
     try {
       const requestBody: ChatRequest = {
         content,
@@ -131,6 +134,8 @@ export class ApiChatService implements IChatService {
       }
 
       let fullResponse = "";
+      let resultThreadId = threadId || "";
+      const isNewThread = !threadId;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -154,7 +159,10 @@ export class ApiChatService implements IChatService {
                 fullResponse += parsed.chunk;
                 onChunk(parsed.chunk);
               }
-              // Note: We ignore threadId updates here as they're handled by the use case
+              // Capture threadId from server response
+              if (parsed.threadId) {
+                resultThreadId = parsed.threadId;
+              }
             } catch (_e) {
               // Ignore parse errors for incomplete chunks
             }
@@ -162,7 +170,11 @@ export class ApiChatService implements IChatService {
         }
       }
 
-      return Message.create("assistant", fullResponse);
+      return {
+        message: Message.create("assistant", fullResponse),
+        threadId: resultThreadId,
+        isNewThread,
+      };
     } catch (error) {
       // Don't log abort errors as they're user-initiated
       if (error instanceof Error && error.name === "AbortError") {
