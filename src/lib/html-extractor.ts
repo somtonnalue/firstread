@@ -27,6 +27,16 @@ export function hasHtmlCode(content: string): boolean {
 }
 
 /**
+ * Remove HTML code block from markdown content
+ * Returns only the markdown preview without the HTML code block
+ */
+export function removeHtmlCodeBlock(content: string): string {
+  // Remove everything from ```html onwards
+  const htmlBlockRegex = /```html[\s\S]*$/i;
+  return content.replace(htmlBlockRegex, "").trim();
+}
+
+/**
  * Download HTML content as a file
  */
 export function downloadHtml(

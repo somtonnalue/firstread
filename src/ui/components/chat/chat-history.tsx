@@ -205,7 +205,7 @@ export const ChatHistory = forwardRef<ChatHistoryRef, ChatHistoryProps>(function
             filteredThreads.map((thread) => (
               <div
                 key={thread.id}
-                className={`group relative rounded-lg p-3 cursor-pointer transition-colors ${
+                className={`group relative rounded-lg p-3 cursor-pointer transition-colors max-w-4/6 ${
                   currentThreadId === thread.id
                     ? "bg-accent border border-accent-foreground/20"
                     : "hover:bg-accent/50"

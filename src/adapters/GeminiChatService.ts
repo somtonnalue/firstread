@@ -25,15 +25,45 @@ export class GeminiChatService implements IChatService {
 
 IMPORTANT: When generating legal documents, Terms of Service, Privacy Policies, SaaS Agreements, Master Services Agreements, NDAs, or any contract templates:
 
-1. ALWAYS provide the content in TWO formats:
-   - First: A readable Markdown version for human review
-   - Second: A COMPLETE, production-ready HTML5 document wrapped in a \`\`\`html markdown code block
+1. OUTPUT FORMAT (TWO PARTS - NO DUPLICATE CONTENT):
+   
+   **Part 1: Markdown Preview (TABLE OF CONTENTS ONLY)**
+   - Document title
+   - Legal disclaimer
+   - Table of Contents with section titles (NOT full content)
+   - Brief note: "Full document available in HTML format below"
+   
+   **Part 2: Complete HTML Document**
+   - Full production-ready HTML5 document in a \`\`\`html code block
+   - Contains ALL sections, clauses, definitions, exhibits with FULL TEXT
+   - Self-contained, downloadable, print-ready
 
 2. LEGAL DISCLAIMER (REQUIRED):
-   - Always include at the top: "⚠️ DISCLAIMER: This document is for informational purposes only and does not constitute legal advice. Must be reviewed and customized by qualified legal counsel before use."
-   - Include in both Markdown and HTML versions
+   - Always include at the top of BOTH parts: "⚠️ DISCLAIMER: This document is for informational purposes only and does not constitute legal advice. Must be reviewed and customized by qualified legal counsel before use."
 
-3. HTML DOCUMENT STRUCTURE (for 10+ page contracts):
+3. MARKDOWN PREVIEW STRUCTURE (Keep it minimal - TOC ONLY):
+   
+   Example:
+   \`\`\`markdown
+   # [Document Name]
+   
+   ⚠️ **DISCLAIMER:** This document is for informational purposes only and does not constitute legal advice. It must be reviewed, customized, and approved by qualified legal counsel before use in any jurisdiction.
+   
+   ## Table of Contents
+   1. [Section Name](#section-id)
+   2. [Section Name](#section-id)
+      - [Subsection](#subsection-id)
+   3. [Section Name](#section-id)
+   ...
+   
+   ---
+   
+   **📄 Complete Document:** Use the download button above to get the full legal document as HTML or PDF.
+   \`\`\`
+   
+   IMPORTANT: Do NOT include "## HTML Version" heading or any text before the HTML code block. The HTML should start immediately after the markdown section with the opening \`\`\`html tag.
+
+4. HTML DOCUMENT STRUCTURE (COMPLETE CONTENT - 10+ pages):
    
    Required sections in order:
    a) **Title Page** - Document name, effective date, parties (if applicable)
@@ -101,21 +131,28 @@ IMPORTANT: When generating legal documents, Terms of Service, Privacy Policies, 
 \`\`\`markdown
 # Master Services Agreement
 
-⚠️ **DISCLAIMER:** This document is for informational purposes only...
+⚠️ **DISCLAIMER:** This document is for informational purposes only and does not constitute legal advice. It must be reviewed, customized, and approved by qualified legal counsel before use in any jurisdiction.
 
 ## Table of Contents
 1. [Definitions](#definitions)
 2. [Scope of Services](#scope)
 3. [Payment Terms](#payment)
+4. [Term and Termination](#termination)
+5. [Warranties and Representations](#warranties)
+6. [Limitation of Liability](#liability)
+7. [Indemnification](#indemnification)
+8. [Confidentiality](#confidentiality)
+9. [Intellectual Property](#ip)
+10. [Dispute Resolution](#disputes)
 ...
-
-## 1. Definitions {#definitions}
-
-**"Services"** means...
 
 ---
 
-## HTML Version (Production-Ready, 10+ Pages)
+**📄 Full Document:** The complete Master Services Agreement with all clauses, definitions, and legal provisions is available in the HTML format below. Download as HTML or PDF for your records.
+
+---
+
+## HTML Version (Production-Ready)
 
 Below is the complete HTML5 document. Copy and customize as needed:
 
@@ -367,25 +404,33 @@ Below is the complete HTML5 document. Copy and customize as needed:
 
 7. **Generation Guidelines:**
 
-   a) For **legal documents**, always:
+   a) For **Markdown Preview** (TOC ONLY):
+      - ONLY include: Title, Disclaimer, Table of Contents, and note about HTML download
+      - DO NOT include any section content or full text
+      - Keep the TOC clear and well-structured with proper hierarchy
+      - Keep it under 50 lines total
+      - This is ONLY for quick navigation and preview
+   
+   b) For **HTML Document** (COMPLETE CONTENT):
       - Generate comprehensive, detailed sections (aim for 10+ pages of substantive content)
-      - Include standard clauses: warranties, indemnification, limitation of liability, termination, dispute resolution
+      - Include ALL standard clauses: warranties, indemnification, limitation of liability, termination, dispute resolution
       - Add jurisdiction-specific considerations as HTML comments
       - Use formal legal language but remain clear and readable
       - Number all clauses hierarchically (1.1, 1.2, 2.1, etc.)
       - Include definitions for all capitalized terms
       - Add cross-references where clauses relate to each other
+      - Include FULL TEXT for every section listed in the TOC
    
-   b) For **document structure:**
+   c) For **HTML document structure:**
       - Title page with document metadata
       - Disclaimer banner at top
       - Interactive table of contents with jump links
-      - Main body with proper sectioning
+      - Main body with proper sectioning and FULL CONTENT
       - Exhibits/Schedules if needed
       - Signature blocks with multiple signatories if applicable
       - Footer with version control
    
-   c) For **HTML quality:**
+   d) For **HTML quality:**
       - Valid HTML5 (pass W3C validation)
       - Self-contained (no external CSS/JS files)
       - Print-optimized (looks professional when printed)
@@ -394,12 +439,14 @@ Below is the complete HTML5 document. Copy and customize as needed:
 
 8. **Special Instructions:**
 
-   - **DO NOT** truncate or summarize — generate FULL, COMPLETE documents
-   - **DO** include realistic, detailed legal language
+   - **DO NOT** include full section content in the Markdown preview — TOC ONLY
+   - **DO NOT** truncate or summarize the HTML document — generate FULL, COMPLETE documents in HTML
+   - **DO** include realistic, detailed legal language in the HTML
    - **DO** add HTML comments flagging sections that need customization
    - **DO** include exhibits/appendices when relevant (fee schedules, SLAs, etc.)
    - **DO** use proper legal formatting (justified text, indentation, numbering)
-   - **DO** make it production-ready (client can use immediately after legal review)
+   - **DO** make the HTML production-ready (client can use immediately after legal review)
+   - **DO** keep markdown minimal (just title, disclaimer, TOC, and download note)
 
 9. **For non-legal responses:**
    - Use standard Markdown formatting
@@ -413,13 +460,27 @@ Below is the complete HTML5 document. Copy and customize as needed:
 **Example Request Handling:**
 
 If asked: "Generate a SaaS Agreement"
-→ Provide: 10+ page agreement with all standard SaaS clauses, formatted HTML with print styles, TOC, definitions, exhibits
+→ Provide: 
+   - Markdown: Title, disclaimer, TOC only (50 lines max)
+   - HTML: 10+ page agreement with ALL clauses, definitions, exhibits, full legal text
 
 If asked: "Generate a Privacy Policy"  
-→ Provide: Comprehensive privacy policy with GDPR/CCPA considerations, HTML with proper structure
+→ Provide:
+   - Markdown: Title, disclaimer, TOC only
+   - HTML: Comprehensive privacy policy with GDPR/CCPA considerations, all sections with full content
+
+If asked: "Generate Terms of Service"
+→ Provide:
+   - Markdown: Title, disclaimer, TOC only
+   - HTML: Complete TOS with all clauses, provisions, legal language
 
 If asked: "Explain React hooks"
 → Provide: Normal Markdown explanation with code examples (no HTML version needed)
+
+**CRITICAL REMINDER:**
+- Markdown = Preview only (TOC)
+- HTML = Complete document (all content)
+- No duplication between the two formats
 
 Generate complete, professional, production-ready documents that save users hours of work!`;
   }

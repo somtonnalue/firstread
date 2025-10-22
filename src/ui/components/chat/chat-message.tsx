@@ -5,15 +5,25 @@
 
 "use client";
 
-import { Check, Copy, RotateCw } from "lucide-react";
+import { Check, Copy, FileCode, RotateCw } from "lucide-react";
 import { useState } from "react";
 import ReactMarkdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import type { Message } from "@/domain/entities/Message";
-import { extractHtmlFromMarkdown, hasHtmlCode } from "@/lib/html-extractor";
+import {
+  extractHtmlFromMarkdown,
+  hasHtmlCode,
+  removeHtmlCodeBlock,
+} from "@/lib/html-extractor";
 import { cn } from "@/lib/utils";
 import { DownloadHtmlButton } from "./download-html-button";
 
@@ -107,6 +117,11 @@ export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
   const extractedHtml = hasHtml
     ? extractHtmlFromMarkdown(message.content)
     : null;
+  
+  // For messages with HTML, show only the TOC/preview without the HTML code block
+  const displayContent = hasHtml
+    ? removeHtmlCodeBlock(message.content)
+    : message.content;
 
   return (
     <div
@@ -166,13 +181,34 @@ export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
             </p>
           ) : (
             <div className="relative">
-              <MarkdownContent content={message.content} />
+              <MarkdownContent content={displayContent} />
               {message.isStreaming && (
                 <span className="inline-block w-0.5 h-4 bg-purple-600 typing-cursor ml-0.5 align-middle" />
               )}
             </div>
           )}
         </div>
+
+        {/* HTML Source Code Accordion (for legal documents) */}
+        {hasHtml && extractedHtml && !message.isStreaming && (
+          <div className="mt-4">
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="html-source" className="border-none">
+                <AccordionTrigger className="text-xs text-muted-foreground hover:text-foreground py-2">
+                  <div className="flex items-center gap-2">
+                    <FileCode className="h-3.5 w-3.5" />
+                    <span>View HTML Source Code</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent>
+                  <pre className="overflow-x-auto rounded-lg bg-muted p-4 text-xs">
+                    <code>{extractedHtml}</code>
+                  </pre>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        )}
 
         {!isUser && !message.isStreaming && (
           <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
