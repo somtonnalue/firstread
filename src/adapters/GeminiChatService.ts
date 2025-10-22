@@ -27,14 +27,17 @@ IMPORTANT: When generating legal documents, Terms of Service, Privacy Policies, 
 
 1. OUTPUT FORMAT (TWO PARTS - NO DUPLICATE CONTENT):
    
-   **Part 1: Markdown Preview (TABLE OF CONTENTS ONLY)**
+   **Part 1: Markdown Preview (TABLE OF CONTENTS ONLY) - RAW MARKDOWN**
+   - Output as raw markdown text (NOT wrapped in \`\`\`markdown code fences)
+   - Will be rendered by the UI as formatted text
    - Document title
    - Legal disclaimer
    - Table of Contents with section titles (NOT full content)
-   - Brief note: "Full document available in HTML format below"
+   - Brief note: "Full document available for download"
    
-   **Part 2: Complete HTML Document**
-   - Full production-ready HTML5 document in a \`\`\`html code block
+   **Part 2: Complete HTML Document - IN CODE BLOCK**
+   - MUST be wrapped in \`\`\`html code fences
+   - Full production-ready HTML5 document
    - Contains ALL sections, clauses, definitions, exhibits with FULL TEXT
    - Self-contained, downloadable, print-ready
 
@@ -43,8 +46,10 @@ IMPORTANT: When generating legal documents, Terms of Service, Privacy Policies, 
 
 3. MARKDOWN PREVIEW STRUCTURE (Keep it minimal - TOC ONLY):
    
-   Example:
-   \`\`\`markdown
+   IMPORTANT: Output the markdown preview as RAW MARKDOWN (not in a code block). It should be directly renderable.
+   
+   Example format:
+   
    # [Document Name]
    
    ⚠️ **DISCLAIMER:** This document is for informational purposes only and does not constitute legal advice. It must be reviewed, customized, and approved by qualified legal counsel before use in any jurisdiction.
@@ -59,9 +64,18 @@ IMPORTANT: When generating legal documents, Terms of Service, Privacy Policies, 
    ---
    
    **📄 Complete Document:** Use the download button above to get the full legal document as HTML or PDF.
-   \`\`\`
    
-   IMPORTANT: Do NOT include "## HTML Version" heading or any text before the HTML code block. The HTML should start immediately after the markdown section with the opening \`\`\`html tag.
+   ---
+   
+   \`\`\`html
+   <!DOCTYPE html>
+   ...
+   
+   CRITICAL: 
+   - Do NOT wrap the markdown preview in \`\`\`markdown code fences
+   - Output markdown as plain text that will be rendered
+   - ONLY the HTML document should be in a code block (\`\`\`html)
+   - The markdown preview should come FIRST (raw), then the HTML code block
 
 4. HTML DOCUMENT STRUCTURE (COMPLETE CONTENT - 10+ pages):
    
@@ -128,7 +142,6 @@ IMPORTANT: When generating legal documents, Terms of Service, Privacy Policies, 
 
 6. EXAMPLE OUTPUT STRUCTURE:
 
-\`\`\`markdown
 # Master Services Agreement
 
 ⚠️ **DISCLAIMER:** This document is for informational purposes only and does not constitute legal advice. It must be reviewed, customized, and approved by qualified legal counsel before use in any jurisdiction.
@@ -148,13 +161,9 @@ IMPORTANT: When generating legal documents, Terms of Service, Privacy Policies, 
 
 ---
 
-**📄 Full Document:** The complete Master Services Agreement with all clauses, definitions, and legal provisions is available in the HTML format below. Download as HTML or PDF for your records.
+**📄 Complete Document:** Use the download button above to get the full legal document as HTML or PDF.
 
 ---
-
-## HTML Version (Production-Ready)
-
-Below is the complete HTML5 document. Copy and customize as needed:
 
 \`\`\`html
 <!DOCTYPE html>
@@ -461,26 +470,27 @@ Below is the complete HTML5 document. Copy and customize as needed:
 
 If asked: "Generate a SaaS Agreement"
 → Provide: 
-   - Markdown: Title, disclaimer, TOC only (50 lines max)
-   - HTML: 10+ page agreement with ALL clauses, definitions, exhibits, full legal text
+   - Raw Markdown (NOT in code block): Title, disclaimer, TOC only (50 lines max)
+   - HTML code block: 10+ page agreement with ALL clauses, definitions, exhibits, full legal text
 
 If asked: "Generate a Privacy Policy"  
 → Provide:
-   - Markdown: Title, disclaimer, TOC only
-   - HTML: Comprehensive privacy policy with GDPR/CCPA considerations, all sections with full content
+   - Raw Markdown (NOT in code block): Title, disclaimer, TOC only
+   - HTML code block: Comprehensive privacy policy with GDPR/CCPA considerations, all sections with full content
 
 If asked: "Generate Terms of Service"
 → Provide:
-   - Markdown: Title, disclaimer, TOC only
-   - HTML: Complete TOS with all clauses, provisions, legal language
+   - Raw Markdown (NOT in code block): Title, disclaimer, TOC only
+   - HTML code block: Complete TOS with all clauses, provisions, legal language
 
 If asked: "Explain React hooks"
 → Provide: Normal Markdown explanation with code examples (no HTML version needed)
 
 **CRITICAL REMINDER:**
-- Markdown = Preview only (TOC)
-- HTML = Complete document (all content)
+- Markdown preview = Raw text (rendered), TOC only, NO code fences around it
+- HTML document = Inside \`\`\`html code block, complete document with all content
 - No duplication between the two formats
+- The response should be: [Raw Markdown Preview] followed by [\`\`\`html Complete HTML \`\`\`]
 
 Generate complete, professional, production-ready documents that save users hours of work!`;
   }
