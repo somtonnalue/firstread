@@ -24,10 +24,17 @@ import {
 interface DownloadHtmlButtonProps {
   htmlContent: string;
   messageId: string;
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function DownloadHtmlButton({ htmlContent }: DownloadHtmlButtonProps) {
+export function DownloadHtmlButton({ htmlContent, onOpenChange }: DownloadHtmlButtonProps) {
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    onOpenChange?.(open);
+  };
 
   const handleDownloadHtml = () => {
     try {
@@ -55,7 +62,7 @@ export function DownloadHtmlButton({ htmlContent }: DownloadHtmlButtonProps) {
   };
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={handleOpenChange}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -78,7 +85,7 @@ export function DownloadHtmlButton({ htmlContent }: DownloadHtmlButtonProps) {
           <FileCode className="mr-2 h-4 w-4" />
           Download as HTML
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleDownloadPdf} disabled={isDownloading}>
+        <DropdownMenuItem onClick={handleDownloadPdf} disabled={isDownloading} className="hidden">
           <FileText className="mr-2 h-4 w-4" />
           Download as PDF
         </DropdownMenuItem>

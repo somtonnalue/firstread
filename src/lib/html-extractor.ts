@@ -55,7 +55,25 @@ export function downloadHtml(
 }
 
 /**
+ * Sanitize HTML to remove unsupported CSS features for html2canvas
+ * Converts modern CSS color functions (lab, lch, oklab, etc.) to fallback colors
+ */
+function sanitizeHtmlForPdf(html: string): string {
+  // Remove or convert unsupported color functions
+  let sanitized = html;
+  
+  // Replace lab() colors with fallback
+  sanitized = sanitized.replace(/lab\([^)]+\)/gi, "#000000");
+  sanitized = sanitized.replace(/lch\([^)]+\)/gi, "#000000");
+  sanitized = sanitized.replace(/oklab\([^)]+\)/gi, "#000000");
+  sanitized = sanitized.replace(/oklch\([^)]+\)/gi, "#000000");
+  
+  return sanitized;
+}
+
+/**
  * Download HTML content as PDF
+ * Renders in a hidden off-screen container to prevent screen glitching
  */
 export async function downloadPdf(
   html: string,
@@ -63,17 +81,78 @@ export async function downloadPdf(
 ): Promise<void> {
   const html2pdf = (await import("html2pdf.js")).default;
 
-  // Generate and download PDF with configurations
-  await html2pdf()
-    .from(html)
-    .set({
-      margin: 10,
-      filename,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
-    })
-    .save();
+  // Sanitize HTML to remove unsupported CSS features
+  const sanitizedHtml = sanitizeHtmlForPdf(html);
+
+  // Create a completely isolated container with shadow DOM
+  const tempContainer = document.createElement("div");
+  tempContainer.style.cssText = `
+    position: fixed !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 210mm !important;
+    visibility: hidden !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-family: Arial, sans-serif !important;
+    all: initial !important;
+  `;
+  
+  // Create an iframe for complete isolation from page styles
+  const iframe = document.createElement("iframe");
+  iframe.style.cssText = `
+    position: fixed !important;
+    left: -9999px !important;
+    top: -9999px !important;
+    width: 210mm !important;
+    height: 297mm !important;
+    border: none !important;
+    visibility: hidden !important;
+  `;
+  
+  document.body.appendChild(iframe);
+  
+  // Write HTML to iframe to isolate from parent styles
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!iframeDoc) {
+    document.body.removeChild(iframe);
+    throw new Error("Failed to create isolated document for PDF generation");
+  }
+  
+  iframeDoc.open();
+  iframeDoc.write(sanitizedHtml);
+  iframeDoc.close();
+
+  try {
+    // Wait for iframe to fully load
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
+    console.log("🔍 [DEBUG] iframeDoc.body:", iframeDoc.body);
+    console.log("🔍 [DEBUG] sanitizedHtml:", sanitizedHtml);
+    
+    // Generate and download PDF from iframe body
+    await html2pdf()
+      .from(iframeDoc.body)
+      .set({
+        margin: 10,
+        filename,
+        image: { type: "jpeg", quality: 0.98 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true,
+          logging: false,
+          windowWidth: 794, // A4 width in pixels at 96 DPI
+          windowHeight: 1123, // A4 height in pixels at 96 DPI
+          backgroundColor: "#ffffff",
+        },
+        jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
+      })
+      .save();
+  } finally {
+    // Always remove the iframe
+    document.body.removeChild(iframe);
+  }
 }
 
 /**

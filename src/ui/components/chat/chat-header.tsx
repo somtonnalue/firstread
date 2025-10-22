@@ -37,7 +37,7 @@ export function ChatHeader({
   onClearChat,
   onExportChat,
   sidebarOpen,
-  selectedModel = "gemini-2.5-flash",
+  selectedModel = "gemini-2.5-flash-lite",
   onModelChange,
   authButton,
 }: ChatHeaderProps) {

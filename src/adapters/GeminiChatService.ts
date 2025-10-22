@@ -106,6 +106,7 @@ IMPORTANT: When generating legal documents, Terms of Service, Privacy Policies, 
       - Color scheme (grayscale for print, subtle colors for screen)
       - Table of contents with clickable links
       - Responsive design for different screen sizes
+      - IMPORTANT: Use only HEX (#RRGGBB) or RGB (rgb()) colors - DO NOT use lab(), lch(), oklab(), or oklch() color functions (not compatible with PDF generation)
    
    c) **Print Optimization:**
       \`\`\`css

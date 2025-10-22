@@ -105,6 +105,7 @@ interface ChatMessageProps {
 
 export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(message.content);
@@ -211,7 +212,10 @@ export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
         )}
 
         {!isUser && !message.isStreaming && (
-          <div className="flex items-center gap-2 opacity-0 transition-opacity group-hover:opacity-100">
+          <div className={cn(
+            "flex items-center gap-2 transition-opacity",
+            isDropdownOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+          )}>
             <Button
               variant="ghost"
               size="sm"
@@ -230,6 +234,7 @@ export function ChatMessage({ message, onRegenerate }: ChatMessageProps) {
               <DownloadHtmlButton
                 htmlContent={extractedHtml}
                 messageId={message.id}
+                onOpenChange={setIsDropdownOpen}
               />
             )}
 

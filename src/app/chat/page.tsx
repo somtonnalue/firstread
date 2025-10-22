@@ -18,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { PanelLeft, X } from "lucide-react";
 
 export default function Home() {
-  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-2.5-flash-lite");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const chatInputRef = useRef<ChatInputRef>(null);
   const chatHistoryRef = useRef<ChatHistoryRef>(null);
